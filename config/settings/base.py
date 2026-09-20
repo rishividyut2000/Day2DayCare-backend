@@ -1,4 +1,5 @@
 """Shared settings. Environment-specific modules import from here."""
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -50,8 +51,8 @@ TENANT_APPS = [
 
 INSTALLED_APPS = SHARED_APPS + [a for a in TENANT_APPS if a not in SHARED_APPS]
 
-TENANT_MODEL = "apps.tenants.Client"
-TENANT_DOMAIN_MODEL = "apps.tenants.Domain"
+TENANT_MODEL = "tenants.Client"
+TENANT_DOMAIN_MODEL = "tenants.Domain"
 PUBLIC_SCHEMA_NAME = "public"
 
 # ---------------------------------------------------------- middleware ----
@@ -135,8 +136,6 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
 }
-
-from datetime import timedelta  # noqa: E402
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env.int("JWT_ACCESS_MINUTES", 15)),

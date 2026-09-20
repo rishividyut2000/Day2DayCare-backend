@@ -2,6 +2,8 @@
 ignore=CVS,.git,migrations,__pycache__,.venv
 jobs=0
 persistent=yes
+load-plugins=pylint_django
+django-settings-module=config.settings.test
 
 [MESSAGES CONTROL]
 disable=
@@ -21,7 +23,13 @@ disable=
     invalid-name,
     line-too-long,
     no-member,
-    fixme
+    fixme,
+    wildcard-import,
+    unused-wildcard-import,
+    wrong-import-position,
+    wrong-import-order,
+    trailing-whitespace,
+    unused-argument
 
 [REPORTS]
 output-format=colorized
@@ -39,9 +47,6 @@ max-statements=70
 
 [TYPECHECK]
 ignored-modules=django,rest_framework,celery
-
-[IMPORTS]
-known-first-party=apps,config
 
 [PYTHON]
 ignore-patterns=.*_pb2.py

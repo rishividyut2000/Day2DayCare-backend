@@ -55,7 +55,7 @@ class TenantAccess(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(GlobalUser, on_delete=models.CASCADE, related_name="tenants")
     tenant = models.ForeignKey("tenants.Client", on_delete=models.CASCADE)
-    staff_id = models.UUIDField(null=True, blank=True)   # tenant_<x>.staff.id
+    staff_id = models.UUIDField(null=True, blank=True)  # tenant_<x>.staff.id
     is_default = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
