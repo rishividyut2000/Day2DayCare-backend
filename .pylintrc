@@ -1,0 +1,50 @@
+[MASTER]
+ignore=CVS,.git,migrations,__pycache__,.venv
+jobs=0
+persistent=yes
+
+[MESSAGES CONTROL]
+disable=
+    duplicate-code,
+    too-few-public-methods,
+    too-many-ancestors,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    import-outside-toplevel,
+    consider-using-f-string,
+    broad-exception-caught,
+    broad-exception-raised,
+    too-many-instance-attributes,
+    too-many-return-statements,
+    too-many-branches,
+    invalid-name,
+    line-too-long,
+    no-member,
+    fixme
+
+[REPORTS]
+output-format=colorized
+score=no
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=8
+max-locals=25
+max-returns=8
+max-branches=20
+max-statements=70
+
+[TYPECHECK]
+ignored-modules=django,rest_framework,celery
+
+[IMPORTS]
+known-first-party=apps,config
+
+[PYTHON]
+ignore-patterns=.*_pb2.py
+
+[SIMILARITIES]
+min-similarity-lines=20

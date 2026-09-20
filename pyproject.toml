@@ -31,6 +31,8 @@ dev = [
     "factory-boy>=3.3",
     "testcontainers[postgres]>=4.0",
     "ruff>=0.4",
+    "pylint>=3.0",
+    "pylint-django>=2.5",
     "mypy>=1.10",
     "django-stubs>=5.0",
     "djangorestframework-stubs>=3.15",
@@ -62,5 +64,5 @@ addopts = "--reuse-db --strict-markers"
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["apps", "config"]
+[tool.setuptools.packages.find]
+include = ["apps*", "config*"]
