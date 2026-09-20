@@ -50,8 +50,8 @@ TENANT_APPS = [
 
 INSTALLED_APPS = SHARED_APPS + [a for a in TENANT_APPS if a not in SHARED_APPS]
 
-TENANT_MODEL = "tenants.Client"
-TENANT_DOMAIN_MODEL = "tenants.Domain"
+TENANT_MODEL = "apps.tenants.Client"
+TENANT_DOMAIN_MODEL = "apps.tenants.Domain"
 PUBLIC_SCHEMA_NAME = "public"
 
 # ---------------------------------------------------------- middleware ----
