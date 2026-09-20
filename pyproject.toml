@@ -52,6 +52,10 @@ plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 strict_optional = true
 warn_unused_ignores = true
 
+[[tool.mypy.overrides]]
+module = ["django_tenants.*", "django_celery_beat.*", "celery.*", "environ.*"]
+ignore_missing_imports = true
+
 [tool.django-stubs]
 django_settings_module = "config.settings.local"
 

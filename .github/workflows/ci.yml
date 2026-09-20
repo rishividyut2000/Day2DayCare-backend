@@ -1,0 +1,54 @@
+name: CI
+
+on: [push]
+
+env:
+  SECRET_KEY: ci-placeholder-secret-key
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/day2daycare
+  REDIS_URL: redis://localhost:6379/0
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - run: pip install -e ".[dev]"
+    - run: ruff check .
+
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - run: pip install -e ".[dev]"
+    - run: mypy apps config tenants manage.py
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: day2daycare
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - run: pip install -e ".[dev]"
+    - run: pytest tests/
