@@ -3,10 +3,12 @@
 Two tenants, real Postgres, no mocks. Mocking the database here would defeat
 the entire purpose — a cross-tenant leak is a patient-data breach, not a bug.
 """
+import json
 from datetime import date, timedelta
 
 import pytest
 from django.core.management import call_command
+from django.test import Client
 from django.utils import timezone
 from django_tenants.utils import schema_context
 
@@ -56,6 +58,30 @@ def test_provision_tenant_creates_usable_admin_password():
     user = GlobalUser.objects.get(email="admin@alphaauth.in")
     assert user.has_usable_password() is True
     assert TenantAccess.objects.filter(user=user).exists() is True
+
+
+@pytest.mark.django_db
+def test_provisioned_admin_can_login_and_receive_tokens():
+    call_command(
+        "provision_tenant",
+        code="loginflow",
+        name="Login Flow Clinic",
+        email="login@flow.in",
+        password="Passw0rd!123",
+    )
+
+    client = Client()
+    response = client.post(
+        "/api/v1/auth/login",
+        data=json.dumps({"email": "login@flow.in", "password": "Passw0rd!123"}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert {"access", "refresh"}.issubset(payload)
+    assert payload["access"]
+    assert payload["refresh"]
 
 
 @pytest.mark.django_db
