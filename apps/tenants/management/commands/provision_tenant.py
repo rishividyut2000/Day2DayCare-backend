@@ -8,6 +8,10 @@ from django.db import transaction
 from django_tenants.utils import schema_context
 
 from apps.accounts.models import GlobalUser, TenantAccess
+from apps.billing.models import Package
+from apps.branches.models import Branch, Discipline
+from apps.exercises.models import Exercise, ExerciseCategory
+from apps.scheduling.models import Modality, ServiceType
 from apps.tenants.models import Client, Domain
 
 
@@ -18,6 +22,7 @@ class Command(BaseCommand):
         parser.add_argument("--code", required=True)
         parser.add_argument("--name", required=True)
         parser.add_argument("--email", required=True)
+        parser.add_argument("--password", default=None)
 
     @transaction.atomic
     def handle(self, *args, **opts):
@@ -39,7 +44,11 @@ class Command(BaseCommand):
         user, created = GlobalUser.objects.get_or_create(
             email=opts["email"], defaults={"full_name": "Administrator"}
         )
-        if created:
+        password = opts.get("password")
+        if password:
+            user.set_password(password)
+            user.save()
+        elif created:
             user.set_unusable_password()
             user.save()
 
@@ -53,8 +62,80 @@ class Command(BaseCommand):
         ))
 
     def seed_masters(self) -> None:
-        """Seed reference data: body regions, joints, modalities, roles, service types.
+        """Seed the first clinic with the essential clinic and scheduling metadata.
 
-        Copy exercises from the shared catalog here too.
+        The tenant needs at least one branch, a core discipline, and the default
+        scheduling catalog used for patient appointments and therapy sessions.
         """
-        # TODO(DSS-23): implement master data seeding
+        Branch.objects.get_or_create(
+            code="main",
+            defaults={
+                "name": "Main Clinic",
+                "city": "Bangalore",
+                "state": "Karnataka",
+                "address": "Primary clinic location",
+                "is_active": True,
+            },
+        )
+
+        Discipline.objects.get_or_create(
+            code="physiotherapy",
+            defaults={
+                "name": "Physiotherapy",
+                "description": "Core physiotherapy and rehabilitation care.",
+                "is_active": True,
+            },
+        )
+
+        for name, duration in {
+            "Physiotherapy Consultation": 45,
+            "Manual Therapy": 30,
+            "Exercise Therapy": 30,
+            "Electrotherapy": 30,
+        }.items():
+            ServiceType.objects.get_or_create(
+                name=name,
+                defaults={"duration_minutes": duration, "is_active": True},
+            )
+
+        for name in [
+            "Manual Therapy",
+            "Exercise Therapy",
+            "Electrotherapy",
+            "Therapeutic Ultrasound",
+            "Stretching",
+        ]:
+            Modality.objects.get_or_create(name=name, defaults={"is_active": True})
+
+        mobility, _ = ExerciseCategory.objects.get_or_create(
+            name="Mobility",
+            defaults={"description": "Mobility and flexibility work for recovery and movement quality.", "is_active": True},
+        )
+        Exercise.objects.get_or_create(
+            code="ankle-dorsiflexion",
+            defaults={
+                "category": mobility,
+                "name": "Ankle Dorsiflexion Mobility",
+                "body_part": "Ankle",
+                "difficulty": 1,
+                "default_sets": 2,
+                "default_reps": 10,
+                "default_hold_seconds": 20,
+                "instructions": "Sit with the knee over the foot and gently move the shin forward.",
+                "precautions": "Stop if sharp pain or tingling occurs.",
+                "is_active": True,
+            },
+        )
+
+        Package.objects.get_or_create(
+            code="starter-10",
+            defaults={
+                "name": "Starter 10 Sessions",
+                "package_type": "session_bundle",
+                "validity_days": 120,
+                "session_count": 10,
+                "price": 7500,
+                "currency": "INR",
+                "is_active": True,
+            },
+        )
