@@ -153,11 +153,12 @@ CELERY_RESULT_BACKEND = env("REDIS_URL")
 CELERY_TASK_ALWAYS_EAGER = False
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
-# ----------------------------------------------------------------- s3 -----
-AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
-AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="ap-south-1")
-AWS_QUERYSTRING_EXPIRE = 300          # presigned GET lives 5 minutes
-AWS_DEFAULT_ACL = None                # never public
+# ----------------------------------------------------- azure blob storage --
+AZURE_ACCOUNT_NAME = env("AZURE_ACCOUNT_NAME", default="")
+AZURE_ACCOUNT_KEY = env("AZURE_ACCOUNT_KEY", default="")
+AZURE_CONTAINER = env("AZURE_CONTAINER", default="")
+AZURE_URL_EXPIRATION_SECS = 300       # SAS-signed GET lives 5 minutes
+AZURE_OVERWRITE_FILES = False
 
 UPLOAD_MAX_BYTES = {"image": 10 * 1024 * 1024, "video": 200 * 1024 * 1024}
 

@@ -1,0 +1,53 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  api:
+    build: .
+    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate_schemas --shared && gunicorn config.asgi:application --bind 0.0.0.0:8000 --workers 3 --worker-class uvicorn.workers.UvicornWorker"
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production_http
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - static_files:/app/staticfiles
+    depends_on: [redis]
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: celery -A config worker -l info
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production_http
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [redis]
+    restart: unless-stopped
+
+  beat:
+    build: .
+    command: celery -A config beat -l info
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production_http
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [redis]
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - static_files:/srv/static:ro
+    depends_on: [api]
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  static_files:
