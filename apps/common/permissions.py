@@ -1,21 +1,27 @@
 from rest_framework.permissions import BasePermission
 
+from apps.accounts.permissions import Perm
 
-class HasPermissionCode(BasePermission):
-    """Checks a permission code carried in the JWT `per` claim.
+
+class HasPermissionFlag(BasePermission):
+    """Checks a permission bit carried in the JWT `per` claim.
+
+    The claim is a decimal string (see apps.accounts.serializers.D2DTokenSerializer)
+    so it's parsed with `int()`, not treated as a JS-unsafe JSON number.
 
     Usage:
         class PatientViewSet(...):
-            permission_classes = [IsAuthenticated, HasPermissionCode]
-            required_permissions = {"POST": "patients.create"}
+            permission_classes = [IsAuthenticated, HasPermissionFlag]
+            required_permissions = {"POST": Perm.PATIENTS_MANAGE}
     """
 
     def has_permission(self, request, view):
         required = getattr(view, "required_permissions", {}).get(request.method)
         if required is None:
             return True
-        granted = set(getattr(request.auth, "payload", {}).get("per", []))
-        return required in granted
+        payload = getattr(request.auth, "payload", {})
+        granted = Perm(int(payload.get("per", 0)))
+        return bool(granted & required)
 
 
 def scope_branches(queryset, request, field="branch_id"):
@@ -25,6 +31,7 @@ def scope_branches(queryset, request, field="branch_id"):
     that has to be remembered at each call site will eventually be forgotten.
     """
     payload = getattr(request.auth, "payload", {})
-    if "branches.view_all" in set(payload.get("per", [])):
+    granted = Perm(int(payload.get("per", 0)))
+    if granted & Perm.BRANCHES_VIEW_ALL:
         return queryset
     return queryset.filter(**{f"{field}__in": payload.get("brn", [])})

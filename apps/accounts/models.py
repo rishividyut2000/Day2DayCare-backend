@@ -49,6 +49,23 @@ class GlobalUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class Role(models.TextChoices):
+    """The 7 actors from the Role Matrix doc (Day2Day CARE: Role Matrix, 31 Oct 2026).
+
+    One role per (user, tenant) pair, stored on TenantAccess. Permission grants
+    for each role live in apps.accounts.permissions.ROLE_PERMISSIONS as a
+    bitmask — this enum is just the label, not the authorization logic.
+    """
+
+    PLATFORM_ADMIN = "platform_admin", "Platform Admin"
+    CLINIC_OWNER = "clinic_owner", "Clinic Owner"
+    BRANCH_MANAGER = "branch_manager", "Branch Manager"
+    PHYSIOTHERAPIST = "physiotherapist", "Physiotherapist"
+    RECEPTIONIST = "receptionist", "Receptionist"
+    BILLING = "billing", "Billing / Accounts"
+    PATIENT = "patient", "Patient"
+
+
 class TenantAccess(models.Model):
     """Which clinics a user may sign into. The JWT `tid` claim comes from here."""
 
@@ -56,6 +73,7 @@ class TenantAccess(models.Model):
     user = models.ForeignKey(GlobalUser, on_delete=models.CASCADE, related_name="tenants")
     tenant = models.ForeignKey("tenants.Client", on_delete=models.CASCADE)
     staff_id = models.UUIDField(null=True, blank=True)  # tenant_<x>.staff.id
+    role = models.CharField(max_length=30, choices=Role.choices, default=Role.PHYSIOTHERAPIST)
     is_default = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
