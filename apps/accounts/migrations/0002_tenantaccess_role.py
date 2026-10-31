@@ -13,6 +13,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tenantaccess',
             name='role',
-            field=models.CharField(choices=[('platform_admin', 'Platform Admin'), ('clinic_owner', 'Clinic Owner'), ('branch_manager', 'Branch Manager'), ('physiotherapist', 'Physiotherapist'), ('receptionist', 'Receptionist'), ('billing', 'Billing / Accounts'), ('patient', 'Patient')], default='physiotherapist', max_length=30),
+            field=models.CharField(
+                choices=[
+                    ('platform_admin', 'Platform Admin'),
+                    ('clinic_owner', 'Clinic Owner'),
+                    ('branch_manager', 'Branch Manager'),
+                    ('physiotherapist', 'Physiotherapist'),
+                    ('receptionist', 'Receptionist'),
+                    ('billing', 'Billing / Accounts'),
+                    ('patient', 'Patient'),
+                ],
+                default='physiotherapist',
+                max_length=30,
+            ),
         ),
     ]

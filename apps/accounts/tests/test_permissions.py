@@ -39,15 +39,15 @@ def test_patient_role_has_no_staff_side_bits(role):
 def test_least_privilege_receptionist_cannot_read_clinical_notes():
     """'Clinical data is never visible to Receptionist or Billing.'"""
     mask = ROLE_PERMISSIONS[Role.RECEPTIONIST]
-    assert not (mask & Perm.CLINICAL_NOTES_VIEW)
-    assert not (mask & Perm.ASSESSMENTS_VIEW)
-    assert not (mask & Perm.PLANS_VIEW)
+    assert not mask & Perm.CLINICAL_NOTES_VIEW
+    assert not mask & Perm.ASSESSMENTS_VIEW
+    assert not mask & Perm.PLANS_VIEW
 
 
 def test_least_privilege_billing_cannot_read_clinical_notes():
     mask = ROLE_PERMISSIONS[Role.BILLING]
-    assert not (mask & Perm.CLINICAL_NOTES_VIEW)
-    assert not (mask & Perm.ASSESSMENTS_VIEW)
+    assert not mask & Perm.CLINICAL_NOTES_VIEW
+    assert not mask & Perm.ASSESSMENTS_VIEW
 
 
 def test_physiotherapist_owns_clinical_workflow():
@@ -61,8 +61,8 @@ def test_physiotherapist_owns_clinical_workflow():
     ):
         assert mask & flag
     # But not financial sign-off or staff management.
-    assert not (mask & Perm.BILLING_APPROVE_REFUND)
-    assert not (mask & Perm.STAFF_ACCOUNTS_MANAGE)
+    assert not mask & Perm.BILLING_APPROVE_REFUND
+    assert not mask & Perm.STAFF_ACCOUNTS_MANAGE
 
 
 def test_financial_overrides_need_approval_role():
@@ -71,13 +71,13 @@ def test_financial_overrides_need_approval_role():
         assert ROLE_PERMISSIONS[role] & Perm.BILLING_APPROVE_REFUND
 
     for role in (Role.PHYSIOTHERAPIST, Role.RECEPTIONIST, Role.BILLING):
-        assert not (ROLE_PERMISSIONS[role] & Perm.BILLING_APPROVE_REFUND)
+        assert not ROLE_PERMISSIONS[role] & Perm.BILLING_APPROVE_REFUND
 
 
 def test_receptionist_can_check_in_but_not_manage_sessions():
     mask = ROLE_PERMISSIONS[Role.RECEPTIONIST]
     assert mask & Perm.SESSIONS_CHECKIN
-    assert not (mask & Perm.SESSIONS_MANAGE)
+    assert not mask & Perm.SESSIONS_MANAGE
 
 
 def test_platform_admin_excluded_from_clinical_and_financial_data():
@@ -90,7 +90,7 @@ def test_platform_admin_excluded_from_clinical_and_financial_data():
         Perm.BILLING_VIEW,
         Perm.APPOINTMENTS_VIEW,
     ):
-        assert not (mask & flag)
+        assert not mask & flag
 
 
 def test_tenants_manage_is_platform_admin_only():
@@ -98,4 +98,4 @@ def test_tenants_manage_is_platform_admin_only():
         if role == Role.PLATFORM_ADMIN:
             assert mask & Perm.TENANTS_MANAGE
         else:
-            assert not (mask & Perm.TENANTS_MANAGE)
+            assert not mask & Perm.TENANTS_MANAGE
